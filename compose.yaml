@@ -2,21 +2,15 @@ name: mc-create-aeronautics
 
 services:
   minecraft:
-    image: ghcr.io/alexcawl/mc-create-aeronautics-server:master-latest
+    image: ghcr.io/alexcawl/mc-create-aeronautics-server:latest
     restart: unless-stopped
     ports:
       - "25565:25565"
       - "24454:24454/udp"
     environment:
       EULA: "TRUE"
-      TYPE: "NEOFORGE"
-      VERSION: "1.21.1"
       ONLINE_MODE: "false"
-      PACKWIZ_URL: "/packwiz/pack.toml"
-      REMOVE_OLD_MODS: "TRUE"
-      REMOVE_OLD_MODS_DEPTH: "1"
       MEMORY: "${MC_MEMORY}"
-      MOTD: "Create Aeronautics"
       ENABLE_RCON: "true"
       RCON_PASSWORD: "${RCON_PASSWORD:?Set RCON_PASSWORD before starting the server}"
       USE_AIKAR_FLAGS: "${USE_AIKAR_FLAGS}"
