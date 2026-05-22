@@ -1,0 +1,135 @@
+name: mc-create-aeronautics
+
+services:
+  minecraft:
+    image: ghcr.io/alexcawl/mc-create-aeronautics-server:master-latest
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+      - "24454:24454/udp"
+    environment:
+      EULA: "TRUE"
+      TYPE: "NEOFORGE"
+      VERSION: "1.21.1"
+      ONLINE_MODE: "false"
+      PACKWIZ_URL: "/packwiz/pack.toml"
+      REMOVE_OLD_MODS: "TRUE"
+      REMOVE_OLD_MODS_DEPTH: "1"
+      MEMORY: "${MC_MEMORY}"
+      MOTD: "Create Aeronautics"
+      ENABLE_RCON: "true"
+      RCON_PASSWORD: "${RCON_PASSWORD:?Set RCON_PASSWORD before starting the server}"
+      USE_AIKAR_FLAGS: "${USE_AIKAR_FLAGS}"
+      UID: "${MC_UID}"
+      GID: "${MC_GID}"
+    volumes:
+      - ./data:/data
+    stdin_open: true
+    tty: true
+
+  monitor:
+    image: itzg/mc-monitor:latest
+    restart: unless-stopped
+    command: export-for-prometheus
+    environment:
+      EXPORT_SERVERS: "minecraft:25565"
+      EXPORT_PORT: "8080"
+      TIMEOUT: "30s"
+    depends_on:
+      - minecraft
+
+  rcon:
+    image: itzg/rcon:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4326:4326"
+      - "127.0.0.1:4327:4327"
+    environment:
+      RWA_USERNAME: "admin"
+      RWA_PASSWORD: "${RCON_WEB_PASSWORD:?Set RCON_WEB_PASSWORD before starting RCON web admin}"
+      RWA_ADMIN: "TRUE"
+      RWA_RCON_HOST: "minecraft"
+      RWA_RCON_PORT: "25575"
+      RWA_RCON_PASSWORD: "${RCON_PASSWORD:?Set RCON_PASSWORD before starting the server}"
+      RWA_GAME: "minecraft"
+      RWA_SERVER_NAME: "Create Aeronautics"
+    volumes:
+      - rcon-data:/opt/rcon-web-admin/db
+    depends_on:
+      - minecraft
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.1
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/kmsg:/dev/kmsg:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - monitor
+      - cadvisor
+      - loki
+      - alloy
+
+  loki:
+    image: grafana/loki:3.7.0
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+
+  alloy:
+    image: grafana/alloy:latest
+    restart: unless-stopped
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy-data:/var/lib/alloy/data
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: "admin"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD before starting monitoring}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus-data:
+  grafana-data:
+  rcon-data:
+  loki-data:
+  alloy-data:

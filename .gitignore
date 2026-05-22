@@ -1,0 +1,14 @@
+# Local environment
+.env
+.env.*
+!.env.defaults
+
+# Runtime state mounted into the Minecraft container
+/data/
+
+# Generated files
+*.log
+*.tmp
+
+# Editor state
+/.idea/
