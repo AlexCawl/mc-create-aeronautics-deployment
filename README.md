@@ -8,7 +8,6 @@ This directory is staged so it can be moved into a separate `mc-create-aeronauti
 
 - `compose.yaml`: Minecraft, monitoring, RCON, and observability stack.
 - `.env.defaults`: public environment template.
-- `scripts/run_minecraft.sh`: convenience runner for pull/down/up and optional mod reinstall.
 - `monitoring/`: Prometheus, Loki, Alloy, and Grafana configuration.
 - `docs/vps.md`: VPS setup and operations.
 - `docs/monitoring.md`: monitoring usage and maintenance.
@@ -17,7 +16,8 @@ This directory is staged so it can be moved into a separate `mc-create-aeronauti
 
 ```sh
 cp .env.defaults .env
-scripts/run_minecraft.sh
+docker compose pull
+docker compose up -d
 ```
 
 See `docs/vps.md` for the full deployment workflow.

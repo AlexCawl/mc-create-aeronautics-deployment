@@ -15,8 +15,6 @@ services:
       ENABLE_RCON: "true"
       RCON_PASSWORD: "${RCON_PASSWORD:?Set RCON_PASSWORD before starting the server}"
       USE_AIKAR_FLAGS: "${USE_AIKAR_FLAGS}"
-      UID: "${MC_UID}"
-      GID: "${MC_GID}"
     volumes:
       - ./data:/data
     stdin_open: true

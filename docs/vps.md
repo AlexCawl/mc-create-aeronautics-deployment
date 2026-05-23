@@ -38,16 +38,12 @@ The server runs with `online-mode=false`, so players without a licensed Microsof
 Start or update the server:
 
 ```sh
-scripts/run_minecraft.sh
+docker compose pull minecraft
+docker compose down
+docker compose up -d
 ```
 
-Force reinstall the server mod jars from the packwiz metadata bundled in the server image:
-
-```sh
-scripts/run_minecraft.sh --reinstall-mods
-```
-
-This deletes `data/mods/*.jar` before starting the container. The server image also sets `REMOVE_OLD_MODS=TRUE`, so normal starts synchronize `/data/mods` with the packwiz server install. `docker compose down -v` does not delete `data/`, because `data/` is a bind-mounted directory in the repository, not a Docker named volume.
+The server image contains the packwiz metadata and synchronizes `/data/mods` on startup. A normal image pull and Compose restart is enough to refresh server-side mods. `docker compose down -v` does not delete `data/`, because `data/` is a bind-mounted directory in the repository, not a Docker named volume.
 
 Stop it:
 
