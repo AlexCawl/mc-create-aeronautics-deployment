@@ -25,11 +25,11 @@ MC_MEMORY=6G
 USE_AIKAR_FLAGS=true
 ```
 
-The Compose file uses `ghcr.io/alexcawl/mc-create-aeronautics-server:master-latest` when the server should track the current `master` build. Change the Minecraft service image to an immutable tag such as `ghcr.io/alexcawl/mc-create-aeronautics-server:v1` when the server should stay pinned.
+The Compose file uses `ghcr.io/alexcawl/mc-create-aeronautics-server:latest` when the server should track the current published build. Change the Minecraft service image to an immutable tag such as `ghcr.io/alexcawl/mc-create-aeronautics-server:v1` when the server should stay pinned.
 
 `MC_MEMORY` controls the Minecraft JVM heap size. `USE_AIKAR_FLAGS=true` enables itzg's bundled Aikar JVM flags.
 
-Minecraft is published on TCP `25565`. Simple Voice Chat is published on UDP `24454`, so the VPS firewall and provider firewall must allow UDP `24454` when voice chat should work outside the container host.
+Minecraft is published on TCP `25565`. Sable also uses UDP `25565` for its low-latency networking pipeline. Simple Voice Chat is published on UDP `24454`. The VPS firewall and provider firewall must allow TCP `25565`, UDP `25565`, and UDP `24454` when players should use all server features from the internet.
 
 The server runs with `online-mode=false`, so players without a licensed Microsoft/Mojang session can join. Use a whitelist and ops list intentionally because Minecraft account identity is no longer verified by Mojang.
 

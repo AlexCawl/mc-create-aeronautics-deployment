@@ -5,7 +5,8 @@ services:
     image: ghcr.io/alexcawl/mc-create-aeronautics-server:latest
     restart: on-failure:5
     ports:
-      - "25565:25565"
+      - "25565:25565/tcp"
+      - "25565:25565/udp"
       - "24454:24454/udp"
     environment:
       EULA: "TRUE"

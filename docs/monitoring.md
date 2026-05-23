@@ -134,7 +134,11 @@ Simple Voice Chat uses UDP `24454` by default:
 VOICE_CHAT_PORT=24454
 ```
 
-Compose publishes `${VOICE_CHAT_PORT:-24454}:24454/udp`. Allow UDP `24454` in the VPS firewall and provider firewall if players should use voice chat.
+Compose publishes `24454:24454/udp`. Allow UDP `24454` in the VPS firewall and provider firewall if players should use voice chat.
+
+## Sable UDP
+
+Sable opens a UDP listener on the Minecraft server port. Compose publishes `25565:25565/udp` alongside `25565:25565/tcp`. Allow both TCP `25565` and UDP `25565` in the VPS firewall and provider firewall.
 
 ## Commands
 
