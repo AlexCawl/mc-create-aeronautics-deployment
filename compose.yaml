@@ -15,6 +15,7 @@ services:
       ENABLE_RCON: "true"
       RCON_PASSWORD: "${RCON_PASSWORD:?Set RCON_PASSWORD before starting the server}"
       USE_AIKAR_FLAGS: "${USE_AIKAR_FLAGS}"
+      JVM_XX_OPTS: "${MC_JVM_XX_OPTS}"
     volumes:
       - ./data:/data
     stdin_open: true
@@ -52,7 +53,7 @@ services:
       - minecraft
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.47.1
+    image: ghcr.io/google/cadvisor:v0.57.0
     restart: unless-stopped
     volumes:
       - /:/rootfs:ro
@@ -62,7 +63,7 @@ services:
       - /dev/kmsg:/dev/kmsg:ro
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.11.3
     restart: unless-stopped
     command:
       - --config.file=/etc/prometheus/prometheus.yml
@@ -78,7 +79,7 @@ services:
       - alloy
 
   loki:
-    image: grafana/loki:3.7.0
+    image: grafana/loki:3.7.2
     restart: unless-stopped
     command: -config.file=/etc/loki/loki-config.yaml
     volumes:
@@ -86,7 +87,7 @@ services:
       - loki-data:/loki
 
   alloy:
-    image: grafana/alloy:latest
+    image: grafana/alloy:v1.16.1
     restart: unless-stopped
     command:
       - run
@@ -101,7 +102,7 @@ services:
       - loki
 
   grafana:
-    image: grafana/grafana-oss:latest
+    image: grafana/grafana-oss:13.0.1
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"

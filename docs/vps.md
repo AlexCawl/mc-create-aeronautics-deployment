@@ -22,12 +22,25 @@ RCON_PASSWORD=change-me
 GRAFANA_ADMIN_PASSWORD=change-me-too
 RCON_WEB_PASSWORD=change-me-too
 MC_MEMORY=6G
-USE_AIKAR_FLAGS=true
+USE_AIKAR_FLAGS=false
+MC_JVM_XX_OPTS=-XX:+UseZGC
 ```
 
 The Compose file uses `ghcr.io/alexcawl/mc-create-aeronautics-server:latest` when the server should track the current published build. Change the Minecraft service image to an immutable tag such as `ghcr.io/alexcawl/mc-create-aeronautics-server:v1` when the server should stay pinned.
 
-`MC_MEMORY` controls the Minecraft JVM heap size. `USE_AIKAR_FLAGS=true` enables itzg's bundled Aikar JVM flags.
+`MC_MEMORY` controls the Minecraft JVM heap size. `MC_JVM_XX_OPTS` is passed to the JVM as `-XX` options and can be used to choose the garbage collector. The default uses ZGC:
+
+```dotenv
+USE_AIKAR_FLAGS=false
+MC_JVM_XX_OPTS=-XX:+UseZGC
+```
+
+Do not enable `USE_AIKAR_FLAGS` at the same time as ZGC, because Aikar's bundled flags select G1GC. To switch back to Aikar/G1GC, use:
+
+```dotenv
+USE_AIKAR_FLAGS=true
+MC_JVM_XX_OPTS=
+```
 
 Minecraft is published on TCP `25565`. Sable also uses UDP `25565` for its low-latency networking pipeline. Simple Voice Chat is published on UDP `24454`. The VPS firewall and provider firewall must allow TCP `25565`, UDP `25565`, and UDP `24454` when players should use all server features from the internet.
 

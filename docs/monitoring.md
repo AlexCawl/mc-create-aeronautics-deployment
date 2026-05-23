@@ -59,21 +59,24 @@ Set these values in the VPS `.env`:
 
 ```sh
 GRAFANA_ADMIN_PASSWORD=change-me
-GRAFANA_ADMIN_USER=admin
-GRAFANA_PORT=3000
 RCON_WEB_PASSWORD=change-me-too
-RCON_WEB_USER=admin
-RCON_WEB_PORT=4326
-RCON_WEB_SOCKET_PORT=4327
-PROMETHEUS_RETENTION=7d
-LOKI_VERSION=3.7.0
-ALLOY_VERSION=latest
-RCON_WEB_VERSION=latest
 ```
 
-`GRAFANA_ADMIN_PASSWORD` and `RCON_WEB_PASSWORD` are required. The other values have defaults.
+`GRAFANA_ADMIN_PASSWORD` and `RCON_WEB_PASSWORD` are required.
+
+Infrastructure images are pinned in Compose so updates are reproducible where upstream publishes stable multi-arch tags:
+
+- `itzg/mc-monitor:0.16.5`
+- `itzg/rcon:latest`
+- `ghcr.io/google/cadvisor:v0.57.0`
+- `prom/prometheus:v3.11.3`
+- `grafana/loki:3.7.2`
+- `grafana/alloy:v1.16.1`
+- `grafana/grafana-oss:13.0.1`
 
 Grafana update checks, usage reporting, and plugin preinstall behavior are disabled in Compose to keep startup logs deterministic and avoid downloading unused bundled plugins.
+
+`itzg/rcon` uses `latest` because its current versioned tags are published for `amd64` only, while `latest` is multi-arch.
 
 ## Metrics
 
