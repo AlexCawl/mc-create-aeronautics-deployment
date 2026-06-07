@@ -15,6 +15,9 @@ services:
       ENABLE_RCON: "true"
       RCON_PASSWORD: "${RCON_PASSWORD:?Set RCON_PASSWORD before starting the server}"
       USE_AIKAR_FLAGS: "${USE_AIKAR_FLAGS}"
+      CFG_TGBRIDGE_BOT_TOKEN: "${CFG_TGBRIDGE_BOT_TOKEN:?Set CFG_TGBRIDGE_BOT_TOKEN before starting TGBridge}"
+      CFG_TGBRIDGE_CHAT_ID: "${CFG_TGBRIDGE_CHAT_ID:?Set CFG_TGBRIDGE_CHAT_ID before starting TGBridge}"
+      CFG_TGBRIDGE_TOPIC_ID: "${CFG_TGBRIDGE_TOPIC_ID:?Set CFG_TGBRIDGE_TOPIC_ID before starting TGBridge}"
     volumes:
       - ./data:/data
     stdin_open: true

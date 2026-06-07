@@ -21,6 +21,9 @@ Then edit the required values:
 RCON_PASSWORD=change-me
 GRAFANA_ADMIN_PASSWORD=change-me-too
 RCON_WEB_PASSWORD=change-me-too
+CFG_TGBRIDGE_BOT_TOKEN=123456789:bot-token-from-botfather
+CFG_TGBRIDGE_CHAT_ID=-1001234567890
+CFG_TGBRIDGE_TOPIC_ID=123
 MC_MEMORY=6G
 USE_AIKAR_FLAGS=false
 MC_JVM_XX_OPTS=-XX:+UseZGC
@@ -45,6 +48,18 @@ MC_JVM_XX_OPTS=
 Minecraft is published on TCP `25565`. Sable also uses UDP `25565` for its low-latency networking pipeline. Simple Voice Chat is published on UDP `24454`. The VPS firewall and provider firewall must allow TCP `25565`, UDP `25565`, and UDP `24454` when players should use all server features from the internet.
 
 The server runs with `online-mode=false`, so players without a licensed Microsoft/Mojang session can join. Use a whitelist and ops list intentionally because Minecraft account identity is no longer verified by Mojang.
+
+## Telegram Alerts
+
+TGBridge is included in the Minecraft server image and reads its runtime config from environment-expanded files. Keep the real bot token in the untracked `.env` file and set:
+
+```dotenv
+CFG_TGBRIDGE_BOT_TOKEN=123456789:bot-token-from-botfather
+CFG_TGBRIDGE_CHAT_ID=-1001234567890
+CFG_TGBRIDGE_TOPIC_ID=123
+```
+
+Do not commit real Telegram credentials. For a group or channel, `CFG_TGBRIDGE_CHAT_ID` is usually negative. If the bot posts into a forum topic, set `CFG_TGBRIDGE_TOPIC_ID` to that topic id.
 
 ## Server Commands
 
