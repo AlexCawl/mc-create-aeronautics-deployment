@@ -113,13 +113,36 @@ Prometheus, Grafana, Loki, Alloy, and RCON Web Admin store runtime state in Dock
 
 ## Backups
 
-Runtime state is in `data/`. Back up at least:
+The `backups` service runs `itzg/mc-backup:latest` and writes local tar archives to `backups/`. It uses the existing internal RCON connection to flush world data, pause saves during the archive, and resume saves after the backup completes. The service starts its daily schedule 15 minutes after startup and keeps up to 14 days or 14 archives.
 
-```text
-data/world/
-data/world_nether/
-data/world_the_end/
-data/server.properties
-data/ops.json
-data/whitelist.json
+Run an on-demand backup:
+
+```sh
+docker compose exec backups backup now
+```
+
+Follow backup logs:
+
+```sh
+docker compose logs -f backups
+```
+
+Check local archives:
+
+```sh
+ls -lh backups
+```
+
+Restore only into an empty `data/` directory. Stop the server first, move or recreate `data/`, then run:
+
+```sh
+docker compose down
+mv data "data.before-restore.$(date +%Y%m%d-%H%M%S)"
+mkdir data
+docker run --rm \
+  -v "$PWD/data:/data" \
+  -v "$PWD/backups:/backups:ro" \
+  --entrypoint restore-tar-backup \
+  itzg/mc-backup:latest
+docker compose up -d
 ```

@@ -56,6 +56,25 @@ services:
     depends_on:
       - minecraft
 
+  backups:
+    image: itzg/mc-backup:latest
+    restart: unless-stopped
+    environment:
+      RCON_HOST: "minecraft"
+      RCON_PORT: "25575"
+      RCON_PASSWORD: "${RCON_PASSWORD:?Set RCON_PASSWORD before starting the server}"
+      BACKUP_METHOD: "tar"
+      BACKUP_INTERVAL: "24h"
+      INITIAL_DELAY: "15m"
+      BACKUP_NAME: "mc-create-aeronautics"
+      PRUNE_BACKUPS_DAYS: "14"
+      PRUNE_BACKUPS_COUNT: "14"
+    volumes:
+      - ./data:/data:ro
+      - ./backups:/backups
+    depends_on:
+      - minecraft
+
   cadvisor:
     image: ghcr.io/google/cadvisor:v0.57.0
     restart: unless-stopped

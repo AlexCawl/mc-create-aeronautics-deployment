@@ -5,6 +5,7 @@
 
 # Runtime state mounted into the Minecraft container
 /data/
+/backups/
 
 # Generated files
 *.log

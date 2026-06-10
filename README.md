@@ -8,6 +8,7 @@ This directory is staged so it can be moved into a separate `mc-create-aeronauti
 
 - `compose.yaml`: Minecraft, monitoring, RCON, and observability stack.
 - `.env.defaults`: public environment template.
+- `backups/`: ignored local Minecraft backup archives created on the VPS.
 - `monitoring/`: Prometheus, Loki, Alloy, and Grafana configuration.
 - `docs/vps.md`: VPS setup and operations.
 - `docs/monitoring.md`: monitoring usage and maintenance.
