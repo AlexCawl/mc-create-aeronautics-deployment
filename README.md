@@ -20,6 +20,6 @@ docker compose pull
 docker compose up -d
 ```
 
-Fill the required values in `.env` before starting, including RCON, Grafana, and `CFG_TGBRIDGE_*` Telegram settings.
+Fill the required values in `.env` before starting, including RCON, Grafana, and `CFG_TGBRIDGE_*` Telegram/BlueMap settings.
 
 See `docs/vps.md` for the full deployment workflow.
