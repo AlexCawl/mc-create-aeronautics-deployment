@@ -25,14 +25,15 @@ CFG_TGBRIDGE_BOT_TOKEN=123456789:bot-token-from-botfather
 CFG_TGBRIDGE_CHAT_ID=-1001234567890
 CFG_TGBRIDGE_TOPIC_ID=123
 CFG_TGBRIDGE_BLUEMAP_URL=https://map.example.com
-MC_MEMORY=6G
+MC_INIT_MEMORY=6G
+MC_MAX_MEMORY=16G
 USE_AIKAR_FLAGS=false
 MC_JVM_XX_OPTS=-XX:+UseZGC
 ```
 
 The Compose file uses `ghcr.io/alexcawl/mc-create-aeronautics-server:latest` when the server should track the current published build. Change the Minecraft service image to an immutable tag such as `ghcr.io/alexcawl/mc-create-aeronautics-server:v1` when the server should stay pinned.
 
-`MC_MEMORY` controls the Minecraft JVM heap size. `MC_JVM_XX_OPTS` is passed to the JVM as `-XX` options and can be used to choose the garbage collector. The default uses ZGC:
+`MC_INIT_MEMORY` controls the initial Minecraft JVM heap size, and `MC_MAX_MEMORY` controls the maximum heap size. For a 32 GB VPS, `MC_INIT_MEMORY=6G` and `MC_MAX_MEMORY=16G` leave room for native memory, Docker, monitoring, OS cache, and world-generation worker threads. `MC_JVM_XX_OPTS` is passed to the JVM as `-XX` options and can be used to choose the garbage collector. The default uses ZGC:
 
 ```dotenv
 USE_AIKAR_FLAGS=false

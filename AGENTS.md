@@ -53,7 +53,7 @@
 ## Minecraft Operations
 
 - The server currently runs with `ONLINE_MODE=false`; operational docs must continue to call out whitelist/ops implications.
-- `MC_MEMORY`, `USE_AIKAR_FLAGS`, and `MC_JVM_XX_OPTS` are runtime tuning knobs. Do not enable Aikar flags and ZGC together in examples.
+- `MC_INIT_MEMORY`, `MC_MAX_MEMORY`, `USE_AIKAR_FLAGS`, and `MC_JVM_XX_OPTS` are runtime tuning knobs. Do not enable Aikar flags and ZGC together in examples.
 - Normal server updates should be documented as `docker compose pull` plus `docker compose up -d` or a focused Minecraft service restart.
 - Backups should focus on `data/world/`, `data/world_nether/`, `data/world_the_end/`, `data/server.properties`, `data/ops.json`, and `data/whitelist.json` when those paths exist.
 
