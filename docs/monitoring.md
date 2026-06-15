@@ -64,19 +64,20 @@ RCON_WEB_PASSWORD=change-me-too
 
 `GRAFANA_ADMIN_PASSWORD` and `RCON_WEB_PASSWORD` are required.
 
-Infrastructure images are pinned in Compose so updates are reproducible where upstream publishes stable multi-arch tags:
+The current Compose file uses these infrastructure images:
 
-- `itzg/mc-monitor:0.16.5`
+- `itzg/mc-monitor:latest`
 - `itzg/rcon:latest`
+- `itzg/mc-backup:latest`
 - `ghcr.io/google/cadvisor:v0.57.0`
 - `prom/prometheus:v3.11.3`
 - `grafana/loki:3.7.2`
 - `grafana/alloy:v1.16.1`
 - `grafana/grafana-oss:13.0.1`
 
-Grafana update checks, usage reporting, and plugin preinstall behavior are disabled in Compose to keep startup logs deterministic and avoid downloading unused bundled plugins.
+Minecraft uses `ghcr.io/alexcawl/mc-create-aeronautics-server:latest` so the VPS tracks the current published modpack server image unless the Compose file is changed to an immutable tag.
 
-`itzg/rcon` uses `latest` because its current versioned tags are published for `amd64` only, while `latest` is multi-arch.
+Grafana update checks, usage reporting, and plugin preinstall behavior are disabled in Compose to keep startup logs deterministic and avoid downloading unused bundled plugins.
 
 ## Metrics
 
@@ -101,7 +102,9 @@ The exporter listens on `minecraft:19565` inside the Compose network. This port 
 
 cAdvisor mounts `/dev/kmsg` read-only so it can detect container OOM events when the host exposes that device. The repeated `There are no NVM devices!` message is harmless on hosts without persistent memory devices.
 
-Loki stores logs for 7 days by default in the `loki-data` Docker volume. Alloy stores read offsets in the `alloy-data` Docker volume so it can resume log collection after restarts. RCON Web Admin stores its database in the `rcon-data` Docker volume.
+Prometheus stores 7 days of metrics in the `prometheus-data` Docker volume. Loki stores logs for 7 days in the `loki-data` Docker volume. Alloy stores read offsets in the `alloy-data` Docker volume so it can resume log collection after restarts. Grafana stores its database in `grafana-data`, and RCON Web Admin stores its database in `rcon-data`.
+
+These Docker named volumes are disk-backed volumes, not tmpfs memory volumes. On Linux, Prometheus and Loki disk activity can still show up as growing RAM usage through reclaimable page cache. When investigating memory growth, compare container `usage`, `working_set`, and `rss` metrics instead of treating file cache as a process leak.
 
 Grafana provisions three dashboards:
 

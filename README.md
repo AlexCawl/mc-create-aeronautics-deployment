@@ -2,11 +2,9 @@
 
 Deployment configuration for the MC Create Aeronautics server.
 
-This directory is staged so it can be moved into a separate `mc-create-aeronautics-deployment` repository.
-
 ## Contents
 
-- `compose.yaml`: Minecraft, monitoring, RCON, and observability stack.
+- `compose.yaml`: Minecraft, backups, RCON Web Admin, and monitoring/observability stack.
 - `.env.defaults`: public environment template.
 - `backups/`: ignored local Minecraft backup archives created on the VPS.
 - `monitoring/`: Prometheus, Loki, Alloy, and Grafana configuration.
@@ -17,6 +15,7 @@ This directory is staged so it can be moved into a separate `mc-create-aeronauti
 
 ```sh
 cp .env.defaults .env
+${EDITOR:-vi} .env
 docker compose pull
 docker compose up -d
 ```
