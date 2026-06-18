@@ -24,7 +24,7 @@ RCON_WEB_PASSWORD=change-me-too
 CFG_TGBRIDGE_BOT_TOKEN=123456789:bot-token-from-botfather
 CFG_TGBRIDGE_CHAT_ID=-1001234567890
 CFG_TGBRIDGE_TOPIC_ID=123
-CFG_TGBRIDGE_BLUEMAP_URL=https://map.example.com
+CFG_TGBRIDGE_BLUEMAP_URL=https://mc-create-aeronautics.mooo.com
 MC_INIT_MEMORY=6G
 MC_MAX_MEMORY=16G
 USE_AIKAR_FLAGS=true
@@ -44,7 +44,7 @@ With `itzg/minecraft-server:java21`, this selects Aikar's G1GC-oriented JVM flag
 
 Do not enable Aikar flags and ZGC together, because Aikar's bundled flags select G1GC.
 
-Minecraft is published on TCP `25565`. Sable also uses UDP `25565` for its low-latency networking pipeline. BlueMap is published on TCP `8100`. Simple Voice Chat is published on UDP `24454`. The VPS firewall and provider firewall must allow TCP `25565`, UDP `25565`, TCP `8100`, and UDP `24454` when players should use all server features from the internet.
+Minecraft is published on TCP `25565`. Sable also uses UDP `25565` for its low-latency networking pipeline. BlueMap is bound only to localhost on TCP `8100` and should be exposed publicly through the host Nginx reverse proxy on HTTPS `443`. Simple Voice Chat is published on UDP `24454`. The VPS firewall and provider firewall must allow TCP `80`, TCP `443`, TCP `25565`, UDP `25565`, and UDP `24454` when players should use all server features from the internet.
 
 The server runs with `online-mode=false`, so players without a licensed Microsoft/Mojang session can join. Use a whitelist and ops list intentionally because Minecraft account identity is no longer verified by Mojang.
 
@@ -56,10 +56,107 @@ TGBridge is included in the Minecraft server image and reads its runtime config 
 CFG_TGBRIDGE_BOT_TOKEN=123456789:bot-token-from-botfather
 CFG_TGBRIDGE_CHAT_ID=-1001234567890
 CFG_TGBRIDGE_TOPIC_ID=123
-CFG_TGBRIDGE_BLUEMAP_URL=https://map.example.com
+CFG_TGBRIDGE_BLUEMAP_URL=https://mc-create-aeronautics.mooo.com
 ```
 
-Do not commit real Telegram credentials. For a group or channel, `CFG_TGBRIDGE_CHAT_ID` is usually negative. If the bot posts into a forum topic, set `CFG_TGBRIDGE_TOPIC_ID` to that topic id. `CFG_TGBRIDGE_BLUEMAP_URL` must be the public URL that Telegram users can open, for example a domain or `http://<vps-ip>:8100`.
+Do not commit real Telegram credentials. For a group or channel, `CFG_TGBRIDGE_CHAT_ID` is usually negative. If the bot posts into a forum topic, set `CFG_TGBRIDGE_TOPIC_ID` to that topic id. `CFG_TGBRIDGE_BLUEMAP_URL` must be the public HTTPS URL that Telegram users can open, for example `https://mc-create-aeronautics.mooo.com`.
+
+## BlueMap HTTPS and AutoModpack Certificates
+
+This deployment uses Certbot as the single certificate source for BlueMap and AutoModpack. The Minecraft container exposes BlueMap only on `127.0.0.1:8100`, Nginx terminates HTTPS on the VPS host, and AutoModpack receives a private runtime copy of the same certificate under `data/automodpack/.private/`.
+
+Install Nginx and Certbot on the VPS:
+
+```sh
+sudo apt update
+sudo apt install -y nginx certbot python3-certbot-nginx
+```
+
+Allow the public ports used by this deployment:
+
+```sh
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 25565/tcp
+sudo ufw allow 25565/udp
+sudo ufw allow 24454/udp
+```
+
+Create the host Nginx site:
+
+```sh
+sudo tee /etc/nginx/sites-available/mc-create-aeronautics >/dev/null <<'EOF'
+server {
+    listen 80;
+    server_name mc-create-aeronautics.mooo.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8100;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+EOF
+sudo ln -sf /etc/nginx/sites-available/mc-create-aeronautics /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Issue and attach the Let's Encrypt certificate:
+
+```sh
+sudo certbot --nginx -d mc-create-aeronautics.mooo.com
+```
+
+After Certbot updates the Nginx site, BlueMap should be available at:
+
+```text
+https://mc-create-aeronautics.mooo.com
+```
+
+Copy the same certificate into AutoModpack's private runtime directory:
+
+```sh
+sudo mkdir -p ./data/automodpack/.private
+sudo cp /etc/letsencrypt/live/mc-create-aeronautics.mooo.com/fullchain.pem \
+  ./data/automodpack/.private/cert.crt
+sudo cp /etc/letsencrypt/live/mc-create-aeronautics.mooo.com/privkey.pem \
+  ./data/automodpack/.private/key.pem
+sudo chown -R minecraft:minecraft ./data/automodpack/.private
+sudo chmod 644 ./data/automodpack/.private/cert.crt
+sudo chmod 600 ./data/automodpack/.private/key.pem
+docker compose restart minecraft
+```
+
+Certbot renews the certificate automatically, but AutoModpack uses copied files. Add a deploy hook so renewed certificates are copied and the Minecraft service is restarted:
+
+```sh
+sudo tee /etc/letsencrypt/renewal-hooks/deploy/automodpack-cert.sh >/dev/null <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOMAIN="mc-create-aeronautics.mooo.com"
+REPO_DIR="/home/minecraft/mc-create-aeronautics-deployment"
+DEPLOY_DIR="$REPO_DIR/data/automodpack/.private"
+
+mkdir -p "$DEPLOY_DIR"
+cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" "$DEPLOY_DIR/cert.crt"
+cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" "$DEPLOY_DIR/key.pem"
+chown minecraft:minecraft "$DEPLOY_DIR/cert.crt" "$DEPLOY_DIR/key.pem"
+chmod 644 "$DEPLOY_DIR/cert.crt"
+chmod 600 "$DEPLOY_DIR/key.pem"
+
+cd "$REPO_DIR"
+docker compose restart minecraft
+EOF
+sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/automodpack-cert.sh
+sudo certbot renew --dry-run
+```
 
 ## Server Commands
 

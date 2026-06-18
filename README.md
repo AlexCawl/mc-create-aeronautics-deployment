@@ -2,6 +2,8 @@
 
 Deployment configuration for the MC Create Aeronautics server.
 
+BlueMap is exposed through host Nginx on HTTPS, with Certbot as the shared certificate source for Nginx and AutoModpack.
+
 ## Contents
 
 - `compose.yaml`: Minecraft, backups, RCON Web Admin, and monitoring/observability stack.
@@ -20,6 +22,6 @@ docker compose pull
 docker compose up -d
 ```
 
-Fill the required values in `.env` before starting, including RCON, Grafana, and `CFG_TGBRIDGE_*` Telegram/BlueMap settings.
+Fill the required values in `.env` before starting, including RCON, Grafana, and `CFG_TGBRIDGE_*` Telegram/BlueMap settings. For the public BlueMap URL, use `https://mc-create-aeronautics.mooo.com` after Nginx and Certbot are configured.
 
 See `docs/vps.md` for the full deployment workflow.

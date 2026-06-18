@@ -34,8 +34,9 @@
 - Keep public game-facing ports intentional:
   - TCP `25565` for Minecraft.
   - UDP `25565` for Sable.
-  - TCP `8100` for BlueMap.
+  - TCP `443` for BlueMap through the host Nginx reverse proxy.
   - UDP `24454` for Simple Voice Chat.
+- Keep BlueMap bound to localhost on `127.0.0.1:8100`; do not publish it directly to the internet unless the user explicitly asks.
 - Keep Grafana and RCON Web Admin bound to localhost unless the user explicitly asks to expose them.
 - Do not publish the Minecraft RCON port directly to the internet.
 - Preserve required-variable guards like `${VAR:?message}` for passwords, Telegram settings, and other mandatory runtime values.
@@ -55,6 +56,7 @@
 - The server currently runs with `ONLINE_MODE=false`; operational docs must continue to call out whitelist/ops implications.
 - `MC_INIT_MEMORY`, `MC_MAX_MEMORY`, `USE_AIKAR_FLAGS`, and `MC_JVM_XX_OPTS` are runtime tuning knobs. Do not enable Aikar flags and ZGC together in examples.
 - Normal server updates should be documented as `docker compose pull` plus `docker compose up -d` or a focused Minecraft service restart.
+- BlueMap HTTPS uses host Nginx with Certbot-managed certificates. AutoModpack receives runtime copies under `data/automodpack/.private/`; do not commit those files.
 - Backups should focus on `data/world/`, `data/world_nether/`, `data/world_the_end/`, `data/server.properties`, `data/ops.json`, and `data/whitelist.json` when those paths exist.
 
 ## Documentation Rules
