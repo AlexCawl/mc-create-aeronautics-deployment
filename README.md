@@ -22,6 +22,6 @@ docker compose pull
 docker compose up -d
 ```
 
-Fill the required values in `.env` before starting, including RCON, Grafana, and `CFG_TGBRIDGE_*` Telegram/BlueMap settings. For the public BlueMap URL, use `https://mc-create-aeronautics.mooo.com` after Nginx and Certbot are configured.
+Fill the required values in `.env` before starting, including RCON, Grafana, and `CFG_TGBRIDGE_*` Telegram/BlueMap settings. Set optional `MC_WORLD_SEED` before the first start if the initial world should use a fixed seed. For the public BlueMap URL, use `https://mc-create-aeronautics.mooo.com` after Nginx and Certbot are configured.
 
 See `docs/vps.md` for the full deployment workflow.

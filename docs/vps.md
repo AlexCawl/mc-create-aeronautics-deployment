@@ -25,12 +25,21 @@ CFG_TGBRIDGE_BOT_TOKEN=123456789:bot-token-from-botfather
 CFG_TGBRIDGE_CHAT_ID=-1001234567890
 CFG_TGBRIDGE_TOPIC_ID=123
 CFG_TGBRIDGE_BLUEMAP_URL=https://mc-create-aeronautics.mooo.com
+MC_WORLD_SEED=
 MC_INIT_MEMORY=6G
 MC_MAX_MEMORY=16G
 USE_AIKAR_FLAGS=true
 ```
 
 The Compose file uses `ghcr.io/alexcawl/mc-create-aeronautics-server:latest` when the server should track the current published build. Change the Minecraft service image to an immutable tag such as `ghcr.io/alexcawl/mc-create-aeronautics-server:v1` when the server should stay pinned.
+
+`MC_WORLD_SEED` is passed to the Minecraft `level-seed` server property through the `itzg/minecraft-server` `SEED` environment variable. Leave it empty for random world generation, or set it before the first server start:
+
+```dotenv
+MC_WORLD_SEED=123456789
+```
+
+The seed is used only when Minecraft generates a new world. Changing `MC_WORLD_SEED` does not alter an existing `data/world`, `data/world_nether`, or `data/world_the_end`; stop the server and move or recreate the world data first if you intentionally need a new world. Quote negative seeds in `.env`, for example `MC_WORLD_SEED="-1785852800490497919"`.
 
 `MC_INIT_MEMORY` controls the initial Minecraft JVM heap size, and `MC_MAX_MEMORY` controls the maximum heap size. For a 32 GB VPS, `MC_INIT_MEMORY=6G` and `MC_MAX_MEMORY=16G` leave room for native memory, Docker, monitoring, OS cache, and world-generation worker threads.
 

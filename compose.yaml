@@ -12,6 +12,7 @@ services:
     environment:
       EULA: "TRUE"
       ONLINE_MODE: "false"
+      SEED: "${MC_WORLD_SEED}"
       INIT_MEMORY: "${MC_INIT_MEMORY}"
       MAX_MEMORY: "${MC_MAX_MEMORY}"
       ENABLE_RCON: "true"
